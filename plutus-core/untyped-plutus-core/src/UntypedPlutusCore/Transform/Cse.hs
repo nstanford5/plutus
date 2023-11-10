@@ -1,13 +1,16 @@
-{-# LANGUAGE LambdaCase        #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TupleSections     #-}
-{-# LANGUAGE TypeFamilies      #-}
-{-# LANGUAGE TypeOperators     #-}
+{-# LANGUAGE ConstraintKinds      #-}
+{-# LANGUAGE LambdaCase           #-}
+{-# LANGUAGE OverloadedStrings    #-}
+{-# LANGUAGE TupleSections        #-}
+{-# LANGUAGE TypeFamilies         #-}
+{-# LANGUAGE TypeOperators        #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module UntypedPlutusCore.Transform.Cse (cse) where
 
 import PlutusCore (MonadQuote, Name, freshName)
 import PlutusCore.MkPlc
+import Universe
 import UntypedPlutusCore.Core
 import UntypedPlutusCore.Purity (isWorkFree)
 import UntypedPlutusCore.Size (termSize)
@@ -22,6 +25,7 @@ import Data.HashMap.Strict (HashMap)
 import Data.HashMap.Strict qualified as Map
 import Data.List.Extra
 import Data.Traversable
+import GHC.Generics
 
 {-
 
@@ -92,6 +96,26 @@ type Path = [Int]
 isAncestorOrSelf :: Path -> Path -> Bool
 isAncestorOrSelf = isSuffixOf
 
+
+newtype AnnotatedTerm uni fun ann = AnnotatedTerm
+  { unAnnotatedTerm :: Term Name uni fun (Path, ann) }
+  deriving stock Generic
+
+instance Eq (Term Name uni fun ann) => Eq (AnnotatedTerm uni fun ann) where
+  AnnotatedTerm t == AnnotatedTerm t' = fmap snd t == fmap snd t'
+
+instance Eq (Term Name uni fun ann) => Hashable (AnnotatedTerm uni fun ann) where
+  hashWithSalt = undefined
+  hash = undefined
+
+termPath :: AnnotatedTerm uni fun ann -> Path
+termPath = fst . termAnn . unAnnotatedTerm
+
+data CseCandidate uni fun ann = CseCandidate
+  { ccFreshName :: Name
+  , ccTerm      :: AnnotatedTerm uni fun ann
+  }
+
 cse ::
   (MonadQuote m, Eq (Term name uni fun ann)) =>
   Term name uni fun ann ->
@@ -99,12 +123,13 @@ cse ::
 cse t = undefined
 
 -- | The first pass. See Note
-annotate :: Term name uni fun ann -> Term name uni fun (Path, ann)
-annotate = flip evalState 0 . flip runReaderT [] . go
+annotate :: forall uni fun ann. Term Name uni fun ann -> AnnotatedTerm uni fun ann
+annotate = AnnotatedTerm . flip evalState 0 . flip runReaderT [] . go
   where
     -- The integer state is the highest ID assigned so far.
     -- The reader context is the current path.
-    go :: Term name uni fun ann -> ReaderT Path (State Int) (Term name uni fun (Path, ann))
+    go :: forall name. Term name uni fun ann
+      -> ReaderT Path (State Int) (Term name uni fun (Path, ann))
     go t = do
       path <- ask
       case t of
@@ -134,38 +159,36 @@ annotate = flip evalState 0 . flip runReaderT [] . go
 
 -- | The second pass. See Note
 collectEvaluations ::
-  (Hashable (Term name uni fun ann)) =>
-  Term name uni fun (Path, ann) ->
-  HashMap (Term name uni fun ann) (HashMap Path Int)
-collectEvaluations = foldrOf termSubtermsDeep addToMap Map.empty
+  AnnotatedTerm uni fun ann ->
+  HashMap (AnnotatedTerm uni fun ann) (HashMap Path Int)
+collectEvaluations =
+  foldrOf termSubtermsDeep (addToMap . AnnotatedTerm) Map.empty . unAnnotatedTerm
 
 addToMap ::
-  (Hashable (Term name uni fun ann)) =>
-  Term name uni fun (Path, ann) ->
-  HashMap (Term name uni fun ann) (HashMap Path Int) ->
-  HashMap (Term name uni fun ann) (HashMap Path Int)
-addToMap t0
+  AnnotatedTerm uni fun ann ->
+  HashMap (AnnotatedTerm uni fun ann) (HashMap Path Int) ->
+  HashMap (AnnotatedTerm uni fun ann) (HashMap Path Int)
+addToMap t hm
   -- We don't consider work-free terms for CSE, because doing so may or may not
   -- have a size benefit, but certainly doesn't have any cost benefit (the cost
   -- will in fact be slightly higher due to the additional application).
-  | isWorkFree t0 = id
-  | otherwise =
-      Map.alter
-        ( \case
-            Nothing    -> Just $ Map.singleton path 1
-            Just paths -> Just $ combinePaths path paths
-        )
-        t
-  where
-    t = fmap snd t0
-    path = fst (termAnn t0)
+  | isWorkFree (unAnnotatedTerm t) = hm
+  | otherwise = case Map.lookup t hm of
+      Nothing    -> Map.insert t (Map.singleton (termPath t) 1) hm
+      Just paths -> undefined
+      -- Map.alter
+      --   ( \case
+      --       Nothing -> Just $ Map.singleton (termPath t) 1
+      --       Just paths -> Just $ combinePaths (termPath t) paths
+      --   )
+      --   t
 
 -- | Combine a new path with a number of existing (path, count) pairs.
 combinePaths :: Path -> HashMap Path Int -> HashMap Path Int
 combinePaths path = Map.fromListWith (+) . go . Map.toList
   where
     go :: [(Path, Int)] -> [(Path, Int)]
-    -- No existing path is an ancestor-or-self or a descendent-or-self of the new path.
+    -- The new path is not a descendent-or-self of any existing path.
     go [] = [(path, 1)]
     go ((path', cnt) : paths)
       -- The new path is an ancestor-or-self of an existing path.
@@ -183,43 +206,32 @@ mkCseTerm ::
   (MonadQuote m, Eq (Term Name uni fun ann)) =>
   -- value: all paths of the term that need cse
   -- the paths should not contain each other
-  HashMap (Term Name uni fun ann) [[Int]] ->
-  Term Name uni fun ([Int], ann) ->
+  HashMap (AnnotatedTerm uni fun ann) [Path] ->
+  Term Name uni fun (Path, ann) ->
   m (Term Name uni fun ann)
 mkCseTerm hm t = do
-  css :: [(Term Name uni fun ann, Name, [Int])] <-
-    processCss . concatMap (uncurry $ fmap . (,)) . sortOn (termSize . fst) $ Map.toList hm
+  cs <-
+    traverse (uncurry mkCseCandidate)
+      . concatMap (uncurry $ fmap . (,))
+      . sortOn (negate . termSize . fst)
+      $ Map.toList hm
+  pure . fmap snd $ foldl' (flip applyCse) t cs
 
-  -- process each common subexpression in css, one by one.
-  -- for each one, we generate a binding at the right level,
-  -- the do the substitution.
-  undefined
+applyCse :: CseCandidate uni fun ann -> Term Name uni fun (Path, ann)
+  ->  Term Name uni fun (Path, ann)
+applyCse c = transformOf termSubterms subst
+  where
+    subst t0 = if t == ccTerm c && ccPath c `isAncestorOrSelf` path
+      then undefined
+      else undefined
+      where
+        t = snd <$> t0
+        path = fst (termAnn t)
 
--- Given a list of (common subexpression, path) pairs, in ascending order of the sizes of the
--- common subexpressions, return a processed list of (common subexpression, name, path) pairs,
--- such that:
--- for each common subexpression we generate a fresh name. Then,
--- for each (expr path) and (expr', path'), if path' contains path,
--- replace all occurrences of expr in expr' with expr's fresh name.
-processCss ::
+mkCseCandidate ::
   forall uni fun ann m.
   (MonadQuote m, Eq (Term Name uni fun ann)) =>
-  [(Term Name uni fun ann, [Int])] ->
-  m [(Term Name uni fun ann, Name, [Int])]
-processCss = foldrM go []
-  where
-    go ::
-      (Term Name uni fun ann, [Int]) ->
-      [(Term Name uni fun ann, Name, [Int])] ->
-      m [(Term Name uni fun ann, Name, [Int])]
-    go (expr, path) xs = do
-      name <- freshName "cse"
-      let subst :: (Term Name uni fun ann, Name, [Int]) -> (Term Name uni fun ann, Name, [Int])
-          subst (expr', name', path') =
-            let substExpr t = if t == expr then Var (termAnn expr) name else t
-                expr'' =
-                  if path `isSuffixOf` path'
-                    then transformOf termSubterms substExpr expr'
-                    else expr'
-             in (expr'', name', path')
-      pure $ (expr, name, path) : fmap subst xs
+  AnnotatedTerm uni fun ann ->
+  Path ->
+  m (CseCandidate uni fun ann)
+mkCseCandidate term path = CseCandidate <$> freshName "cse" <*> pure term <*> pure path
