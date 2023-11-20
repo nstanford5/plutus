@@ -27,6 +27,8 @@ AsData.asData
       deriving newtype (PlutusTx.Eq, PlutusTx.FromData, PlutusTx.UnsafeFromData, PlutusTx.ToData)
     |]
 
+{-# INLINABLE Ints #-}
+
 -- | This is a manually implemented `AsData`, with field accessors that are
 -- more friendly to CSE. We should generate field accessors like these in TH.
 newtype IntsManual = IntsManual PlutusTx.BuiltinData

@@ -66,14 +66,18 @@ mkUnsafeConstrPartsMatchPattern conIx extractFieldNames =
     ixMatchPat = [p| ((PlutusTx.==) (conIx :: Integer) -> True) |]
     -- [unsafeFromBuiltinData -> arg1, ...]
     extractArgPats = (flip fmap) extractFieldNames $ \n ->
-      [p| (unsafeFromBuiltinData -> $(TH.varP n)) |]
+      TH.tildeP $ [p| (unsafeFromBuiltinData -> $(TH.tildeP $ TH.varP n)) |]
     extractArgsPat = go extractArgPats
       where
         go []     = [p| _ |]
-        go [x]    = [p| (BI.head -> $x) |]
-        go (x:xs) = [p| (Builtins.unsafeUncons -> ($x, $(go xs))) |]
+        go [x]    = TH.tildeP [p| (BI.head -> $x) |]
+        go (x:xs) = TH.tildeP $ [p| (unsafeUncons' -> ($x, $(go xs))) |]
     pat = [p| ($ixMatchPat, $extractArgsPat) |]
   in pat
+
+{-# INLINE unsafeUncons' #-}
+unsafeUncons' :: BI.BuiltinList a -> (a, BI.BuiltinList a)
+unsafeUncons' l = (BI.head l, BI.tail l)
 
 toDataClause :: (TH.ConstructorInfo, Int) -> TH.Q TH.Clause
 toDataClause (TH.ConstructorInfo{TH.constructorName=name, TH.constructorFields=argTys}, index) = do
