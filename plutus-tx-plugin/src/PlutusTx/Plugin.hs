@@ -51,6 +51,7 @@ import GHC.Utils.Logger qualified as GHC
 
 import PlutusCore qualified as PLC
 import PlutusCore.Compiler qualified as PLC
+import PlutusCore.Name qualified as PLC
 import PlutusCore.Pretty as PLC
 import PlutusCore.Quote
 import PlutusCore.Version qualified as PLC
@@ -78,6 +79,7 @@ import Data.ByteString.Unsafe qualified as BSUnsafe
 import Data.Either.Validation
 import Data.Map qualified as Map
 import Data.Set qualified as Set
+import Data.Text qualified as T
 import GHC.Num.Integer qualified
 import PlutusIR.Analysis.Builtins
 import PlutusIR.Compiler.Provenance (noProvenance, original)
@@ -458,7 +460,7 @@ runCompiler moduleName opts expr = do
     plcTcConfig <- PLC.getDefTypeCheckConfig PIR.noProvenance
     let plcVersion = opts ^. posPlcTargetVersion
 
-    let hints = UPLC.InlineHints $ \ann _ -> case ann of
+    let destructorHints = UPLC.InlineHints $ \ann _ -> case ann of
             -- See Note [The problem of inlining destructors]
             -- We want to inline destructors, but even in UPLC our inlining heuristics
             -- aren't quite smart enough to tell that they're good inlining candidates,
@@ -470,6 +472,9 @@ runCompiler moduleName opts expr = do
             PIR.DatatypeComponent PIR.Destructor _ -> True
             _                                      ->
                 AlwaysInline `elem` fmap annInline (toList ann)
+        matcherHints = UPLC.InlineHints $ \_ n -> "$m" `T.isPrefixOf` PLC._nameText n
+        hints = destructorHints <> matcherHints
+
     -- Compilation configuration
     let pirTcConfig = if _posDoTypecheck opts
                       -- pir's tc-config is based on plc tcconfig
