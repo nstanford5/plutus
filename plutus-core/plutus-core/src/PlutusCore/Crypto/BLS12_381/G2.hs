@@ -11,6 +11,8 @@ module PlutusCore.Crypto.BLS12_381.G2
     , hashToGroup
     , compress
     , uncompress
+    , serialise
+    , deserialise
     , zero
     , generator
     , memSizeBytes
@@ -44,11 +46,11 @@ instance PrettyBy ConstConfig Element
 instance Flat Element where
     decode = do
         x <- decode
-        case uncompress x of
+        case deserialise x of
              Left err -> fail $ show err
              Right e  -> pure e
-    encode = encode . compress
-    size = size . compress
+    encode = encode . serialise
+    size = size . serialise
 instance NFData Element where
     rnf (Element x) = rwhnf x  -- Just to be on the safe side.
 
@@ -78,6 +80,10 @@ scalarMul = coerce $ flip BlstBindings.blsMult
 compress :: Element -> ByteString
 compress = coerce BlstBindings.blsCompress
 
+{-# INLINE serialise #-}
+serialise :: Element -> ByteString
+serialise = coerce BlstBindings.blsSerialize
+
 {- | Uncompress a bytestring to get a G2 point.  This will fail if any of the
    following are true:
      * The bytestring is not exactly 96 bytes long
@@ -90,6 +96,10 @@ compress = coerce BlstBindings.blsCompress
 {-# INLINE uncompress #-}
 uncompress :: ByteString -> Either BlstBindings.BLSTError Element
 uncompress = coerce BlstBindings.blsUncompress
+
+{-# INLINE deserialise #-}
+deserialise :: ByteString -> Either BlstBindings.BLSTError Element
+deserialise = coerce BlstBindings.blsDeserialize
 
 -- Take an arbitrary bytestring and a Domain Separation Tag and hash them to a
 -- get point in G2.  See Note [Hashing and Domain Separation Tags].
