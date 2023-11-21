@@ -1665,7 +1665,7 @@ instance uni ~ DefaultUni => ToBuiltinMeaning uni DefaultFun where
 
     toBuiltinMeaning _semvar Bls12_381_G1_compress =
         let bls12_381_G1_compressDenotation :: BLS12_381.G1.Element -> BS.ByteString
-            bls12_381_G1_compressDenotation = BLS12_381.G1.compress
+            bls12_381_G1_compressDenotation = BLS12_381.G1.serialise
             {-# INLINE bls12_381_G1_compressDenotation #-}
         in makeBuiltinMeaning
             bls12_381_G1_compressDenotation
@@ -1674,7 +1674,7 @@ instance uni ~ DefaultUni => ToBuiltinMeaning uni DefaultFun where
     toBuiltinMeaning _semvar Bls12_381_G1_uncompress =
         let bls12_381_G1_uncompressDenotation
                 :: BS.ByteString -> Emitter (EvaluationResult BLS12_381.G1.Element)
-            bls12_381_G1_uncompressDenotation = eitherToEmitter . BLS12_381.G1.uncompress
+            bls12_381_G1_uncompressDenotation = eitherToEmitter . BLS12_381.G1.deserialise
             {-# INLINE bls12_381_G1_uncompressDenotation #-}
         in makeBuiltinMeaning
             bls12_381_G1_uncompressDenotation
@@ -1726,7 +1726,7 @@ instance uni ~ DefaultUni => ToBuiltinMeaning uni DefaultFun where
 
     toBuiltinMeaning _semvar Bls12_381_G2_compress =
         let bls12_381_G2_compressDenotation :: BLS12_381.G2.Element -> BS.ByteString
-            bls12_381_G2_compressDenotation = BLS12_381.G2.compress
+            bls12_381_G2_compressDenotation = BLS12_381.G2.serialise
             {-# INLINE bls12_381_G2_compressDenotation #-}
         in makeBuiltinMeaning
             bls12_381_G2_compressDenotation
@@ -1735,7 +1735,7 @@ instance uni ~ DefaultUni => ToBuiltinMeaning uni DefaultFun where
     toBuiltinMeaning _semvar Bls12_381_G2_uncompress =
         let bls12_381_G2_uncompressDenotation
                 :: BS.ByteString -> Emitter (EvaluationResult BLS12_381.G2.Element)
-            bls12_381_G2_uncompressDenotation = eitherToEmitter . BLS12_381.G2.uncompress
+            bls12_381_G2_uncompressDenotation = eitherToEmitter . BLS12_381.G2.deserialise
             {-# INLINE bls12_381_G2_uncompressDenotation #-}
         in makeBuiltinMeaning
             bls12_381_G2_uncompressDenotation
