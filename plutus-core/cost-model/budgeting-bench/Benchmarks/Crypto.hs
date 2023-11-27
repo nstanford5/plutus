@@ -219,7 +219,7 @@ benchBls12_381_G1_compress =
 benchBls12_381_G1_uncompress :: Benchmark
 benchBls12_381_G1_uncompress =
     let name = Bls12_381_G1_uncompress
-        inputs = fmap G1.compress g1inputsA
+        inputs = fmap G1.serialise g1inputsA
     in createOneTermBuiltinBench name [] inputs
 -- constant time
 
@@ -265,7 +265,7 @@ benchBls12_381_G2_compress =
 benchBls12_381_G2_uncompress :: Benchmark
 benchBls12_381_G2_uncompress =
     let name = Bls12_381_G2_uncompress
-        inputs = fmap G2.compress g2inputsA
+        inputs = fmap G2.serialise g2inputsA
     in createOneTermBuiltinBench name [] inputs
 -- constant time
 
