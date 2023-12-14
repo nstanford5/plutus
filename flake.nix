@@ -8,10 +8,12 @@
       url = "github:input-output-hk/iogx";
       inputs.hackage.follows = "hackage";
       inputs.CHaP.follows = "CHaP";
-      inputs.haskell-nix.follows = "haskell-nix";
+      inputs.haskell-nix.follows = "haskell-nix-dontStrip";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.iohk-nix.follows = "iohk-nix";
     };
+
+    haskell-nix-dontStrip.url = "override";
 
     nixpkgs.follows = "haskell-nix/nixpkgs";
 
