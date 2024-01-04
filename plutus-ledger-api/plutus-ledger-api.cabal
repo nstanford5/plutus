@@ -59,6 +59,8 @@ library
     Codec.CBOR.Extras
     PlutusLedgerApi.Common
     PlutusLedgerApi.Common.Versions
+    PlutusLedgerApi.Data.V1.Value
+    PlutusLedgerApi.Data.V2.Contexts
     PlutusLedgerApi.V1
     PlutusLedgerApi.V1.Address
     PlutusLedgerApi.V1.Bytes
