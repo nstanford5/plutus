@@ -3,7 +3,7 @@ module Main where
 import Types
 import GetOpt
 import Mode.HelpVersion
-import Mode.PrintUni
+import Mode.PrintBuiltins
 import Mode.PrintSamples
 import Mode.Compile
 import Mode.Run
@@ -20,7 +20,7 @@ main = do
       in case _mode ?opts of
         Help{} -> runHelp
         Version{} -> runVersion
-        PrintUni{} -> runPrintUni
+        PrintBuiltins{} -> runPrintBuiltins
         PrintSamples{} -> runPrintSamples
         m -> do
             ast <- runCompile

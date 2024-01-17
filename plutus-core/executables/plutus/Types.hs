@@ -73,7 +73,7 @@ data Mode = Compile
           | Run
           | Bench Secs
           | Debug FilePath -- ^ the tx dir
-          | PrintUni
+          | PrintBuiltins
           | PrintSamples
           | Help
           | Version

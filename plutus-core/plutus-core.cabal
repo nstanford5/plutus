@@ -666,7 +666,7 @@ executable plutus
     Mode.Debug
     Mode.HelpVersion
     Mode.PrintSamples
-    Mode.PrintUni
+    Mode.PrintBuiltins
     Mode.Run
 
     AnyProgram.Apply

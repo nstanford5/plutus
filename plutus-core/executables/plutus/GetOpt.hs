@@ -122,8 +122,8 @@ optDescrs =
      (NoArg (set mode Help)) "Show usage"
  , Option [] ["version"]
      (NoArg (set mode Version)) "Show version"
- , Option [] ["print-universe"]
-     (NoArg (set mode PrintUni)) "Print the Default universe & builtins"
+ , Option [] ["print-builtins"]
+     (NoArg (set mode PrintBuiltins)) "Print the Default universe & builtins"
  , Option [] ["print-samples"]
      (NoArg (set mode PrintSamples)) "Print some program samples"
 
