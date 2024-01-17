@@ -97,6 +97,8 @@ optDescrs =
    -- INPUT
    Option [] ["stdin"]
      (NoArg $ addInput StdIn . delInputs StdIn) "Use stdin" -- Note: only the last occurence counts
+ , Option [] ["example"]
+     (ReqArg (addInput . Example) "NAME") "Use example NAME as input. See also --list-examples"
    -- OUTPUT
  , Option [] ["stdout"]
      (NoArg $ setOutput StdOut) "Use stdout"
@@ -124,8 +126,8 @@ optDescrs =
      (NoArg (set mode Version)) "Show version"
  , Option [] ["print-builtins"]
      (NoArg (set mode PrintBuiltins)) "Print the Default universe & builtins"
- , Option [] ["print-samples"]
-     (NoArg (set mode PrintSamples)) "Print some program samples"
+ , Option ['l'] ["list-examples"]
+     (NoArg (set mode ListExamples)) "Print names of examples. Use them later as --example=name"
 
  -- VERBOSITY
  , Option ['q'] ["quiet"]

@@ -665,8 +665,8 @@ executable plutus
     Mode.Compile
     Mode.Debug
     Mode.HelpVersion
-    Mode.PrintSamples
     Mode.PrintBuiltins
+    Mode.ListExamples
     Mode.Run
 
     AnyProgram.Apply
@@ -674,6 +674,7 @@ executable plutus
     AnyProgram.IO
     AnyProgram.Parse
     AnyProgram.With
+    AnyProgram.Example
 
   build-depends:
     , base                                  >=4.9   && <5

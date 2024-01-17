@@ -67,11 +67,14 @@ prettyWithStyle = \case
 readFileName :: FileName -> IO BS.ByteString
 readFileName = \case
     StdOut -> failE "should not happen"
+    -- TODO: it needs some restructuring above on readProgram, because the example should return an ast instead of bytestring
+    Example -> failE "not implemented yet"
     StdIn -> BS.hGetContents stdin
     AbsolutePath fp -> BS.readFile fp
 
 writeFileName :: FileName -> BS.ByteString -> IO ()
 writeFileName fn bs = case fn of
     StdIn -> failE "should not happen"
+    Example -> failE "should not happen"
     StdOut -> BS.hPutStr stdout bs
     AbsolutePath fp -> BS.writeFile fp bs

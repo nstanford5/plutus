@@ -52,9 +52,12 @@ makeLenses ''FileType
 
 -- TODO: in-filenames should be typed separately than out-filenames
 data FileName = AbsolutePath FilePath
+              | Example ExampleName
               | StdIn
               | StdOut
               deriving stock (Eq, Show)
+
+type ExampleName = String
 
 -- tagged by the lang
 data File (l :: Lang) = File
@@ -74,7 +77,7 @@ data Mode = Compile
           | Bench Secs
           | Debug FilePath -- ^ the tx dir
           | PrintBuiltins
-          | PrintSamples
+          | ListExamples
           | Help
           | Version
           deriving stock (Show)

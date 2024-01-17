@@ -4,7 +4,7 @@ import Types
 import GetOpt
 import Mode.HelpVersion
 import Mode.PrintBuiltins
-import Mode.PrintSamples
+import Mode.ListExamples
 import Mode.Compile
 import Mode.Run
 import Mode.Bench
@@ -21,7 +21,7 @@ main = do
         Help{} -> runHelp
         Version{} -> runVersion
         PrintBuiltins{} -> runPrintBuiltins
-        PrintSamples{} -> runPrintSamples
+        ListExamples{} -> runListExamples
         m -> do
             ast <- runCompile
             case m of
