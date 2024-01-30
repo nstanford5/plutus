@@ -373,12 +373,20 @@ readKnownConstant val = asConstant val >>= oneShot \case
 
 data Spine a
     = NilSpine
-    | ConsSpine a (Spine a)
+    | ConsSpine (HeadSpine a) (Spine a)
     deriving stock (Show, Eq, Foldable, Functor)
 
 data HeadSpine a
     = HeadSpine a (Spine a)
-    deriving stock (Show, Eq, Functor)
+    deriving stock (Show, Eq, Foldable, Functor)
+
+type instance UniOf (HeadSpine a) = UniOf a
+
+instance HasConstant a => HasConstant (HeadSpine a) where
+    asConstant (HeadSpine x NilSpine) = asConstant x
+    asConstant _                      = throwNotAConstant
+
+    fromConstant val = HeadSpine (fromConstant val) NilSpine
 
 -- |
 --

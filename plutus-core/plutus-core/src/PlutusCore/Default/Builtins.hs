@@ -1072,7 +1072,7 @@ This was investigated in https://github.com/input-output-hk/plutus/pull/4337 but
 do it quite yet, even though it worked (the Plutus Tx part wasn't implemented).
 -}
 
-headSpine :: Opaque val ab -> [val] -> Opaque (HeadSpine val) b
+headSpine :: Opaque val ab -> [HeadSpine val] -> Opaque (HeadSpine val) b
 headSpine (Opaque f) = Opaque . HeadSpine f . foldr ConsSpine NilSpine
 {-# INLINE headSpine #-}
 
