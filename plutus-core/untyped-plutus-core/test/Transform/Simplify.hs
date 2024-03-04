@@ -66,7 +66,7 @@ caseOfCase3 = runQuote $ do
   xs <- freshName "xs"
   f <- freshName "f"
   let ite = Force () (Builtin () PLC.IfThenElse)
-      true = Constr () 0 (V.fromList [Var () x, Var () xs])
+      true = Constr () 0 [Var () x, Var () xs]
       false = Constr () 1 mempty
       altTrue = Var () f
       altFalse = mkConstant @Integer () 2
