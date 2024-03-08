@@ -29,7 +29,7 @@ data CostModel machinecosts builtincosts =
     CostModel {
       _machineCostModel :: machinecosts
     , _builtinCostModel :: builtincosts
-    } deriving stock (Eq, Show)
+    } deriving stock (Eq, Show, Functor, Foldable, Traversable)
 makeLenses ''CostModel
 
 {-| At execution time we need a 'BuiltinsRuntime' object which includes both the
