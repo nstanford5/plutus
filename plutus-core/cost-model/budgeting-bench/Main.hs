@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fno-warn-unused-imports #-}
 -- See CostModelGeneration.md
 module Main (main) where
 
@@ -66,7 +67,8 @@ main = do
   -- error when the argument gets passed to the nop benchmarks below (but the
   -- data will still be generated and saved in benching.csv).
 
-  criterionMainWith
+{-  criterionMainWith
        Continue
        (defaultConfig { C.timeLimit = 30 }) $
        Benchmarks.Nops.makeBenchmarks gen
+-}
