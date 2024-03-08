@@ -50,7 +50,7 @@ benchSameTwoIntegers gen builtinName =
 makeBenchmarks :: StdGen -> [Benchmark]
 makeBenchmarks gen =
        [benchTwoIntegers gen makeLargeIntegerArgs AddInteger]-- SubtractInteger behaves identically.
-    <> (benchTwoIntegers gen makeDefaultIntegerArgs <$> [MultiplyInteger, DivideInteger])
+    <> (benchTwoIntegers gen makeLargeIntegerArgs <$> [MultiplyInteger, DivideInteger])
            -- RemainderInteger, QuotientInteger, and ModInteger all behave identically.
     <> (benchSameTwoIntegers gen <$> [ EqualsInteger
                                      , LessThanInteger
