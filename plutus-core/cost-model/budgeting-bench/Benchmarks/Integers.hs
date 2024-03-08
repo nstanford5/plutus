@@ -15,8 +15,8 @@ import System.Random (StdGen)
    models of the behaviour of functions for "reasonable" inputs (which will in
    fact probably only occupy one word).  We still need to guard against denial
    of service, and we may need to impose penalties for *really* large inputs. -}
-makeDefaultIntegerArgs :: StdGen -> ([Integer], StdGen)
-makeDefaultIntegerArgs gen = makeSizedIntegers gen [1, 3..31] -- 16 entries
+-- makeDefaultIntegerArgs :: StdGen -> ([Integer], StdGen)
+-- makeDefaultIntegerArgs gen = makeSizedIntegers gen [1, 3..31] -- 16 entries
 
 {- The default arguments give a constant costing function for addition and subtraction.
    These ones give us data where the linear trend is clear. -}
