@@ -21,7 +21,7 @@ import System.Random (StdGen)
 {- The default arguments give a constant costing function for addition and subtraction.
    These ones give us data where the linear trend is clear. -}
 makeLargeIntegerArgs :: StdGen -> ([Integer], StdGen)
-makeLargeIntegerArgs gen = makeSizedIntegers gen [1, 70..1000] -- 15 entries
+makeLargeIntegerArgs gen = makeSizedIntegers gen (fmap (25*) [1..40])
 
 
 benchTwoIntegers :: StdGen -> (StdGen -> ([Integer], StdGen)) -> DefaultFun -> Benchmark
