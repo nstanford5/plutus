@@ -164,10 +164,10 @@ pluginOptions =
                     -- conservative-optimisation implies no-relaxed-floatin, and vice versa
                     -- similarly, it implies preserving logging
                     [ Implication (== True) posRelaxedFloatin False
-                    , Implication (== True) posPreserveLogging True
+                    -- , Implication (== True) posPreserveLogging True
                     , Implication (== True) posCaseOfCaseConservative True
                     , Implication (== False) posRelaxedFloatin True
-                    , Implication (== False) posPreserveLogging False
+                    -- , Implication (== False) posPreserveLogging False
                     , Implication (== False) posCaseOfCaseConservative False
                     ]
               )
@@ -315,7 +315,7 @@ defaultPluginOptions =
         , _posCoverageBoolean = False
         , _posRelaxedFloatin = True
         , _posCaseOfCaseConservative = False
-        , _posPreserveLogging = False
+        , _posPreserveLogging = True
         , _posRemoveTrace = False
         , _posDumpCompilationTrace = False
         }

@@ -497,7 +497,7 @@ runCompiler moduleName opts expr = do
                  & set (PIR.ccOpts . PIR.coRelaxedFloatin) (opts ^. posRelaxedFloatin)
                  & set (PIR.ccOpts . PIR.coCaseOfCaseConservative)
                     (opts ^. posCaseOfCaseConservative)
-                 & set (PIR.ccOpts . PIR.coPreserveLogging) (opts ^. posPreserveLogging)
+                --  & set (PIR.ccOpts . PIR.coPreserveLogging) (opts ^. posPreserveLogging)
                  -- We could make this configurable with an option, but:
                  -- 1. The only other choice you can make is new version + Scott encoding, and
                  -- there's really no reason to pick that

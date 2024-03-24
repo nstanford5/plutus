@@ -125,7 +125,7 @@ defaultCompilationOpts = CompilationOpts
   , _coProfile = False
   , _coRelaxedFloatin = True
   , _coCaseOfCaseConservative = True
-  , _coPreserveLogging = False
+  , _coPreserveLogging = True
   }
 
 data CompilationCtx uni fun a = CompilationCtx {
