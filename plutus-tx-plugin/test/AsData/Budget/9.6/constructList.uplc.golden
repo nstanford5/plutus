@@ -1,0 +1,13 @@
+program
+  1.1.0
+  (\x y ->
+     (\`$bCons` ->
+        `$bCons`
+          (\i -> iData i)
+          unIData
+          x
+          (`$bCons` (\i -> iData i) unIData y (Constr 0 [])))
+       (\`$dToData` `$dUnsafeFromData` arg0_ arg1_ ->
+          constrData
+            1
+            (force mkCons (`$dToData` arg0_) (force mkCons arg1_ []))))

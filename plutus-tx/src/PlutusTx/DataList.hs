@@ -6,9 +6,7 @@
 {-# LANGUAGE TypeFamilies       #-}
 {-# LANGUAGE ViewPatterns       #-}
 
-module PlutusTx.DataList (
-
-) where
+module PlutusTx.DataList where
 
 import PlutusTx.AsData qualified as AsData
 import PlutusTx.IsData qualified as P

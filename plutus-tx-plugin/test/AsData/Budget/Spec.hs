@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds       #-}
+{-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fplugin-opt PlutusTx.Plugin:context-level=0 #-}
 {-# OPTIONS_GHC -fplugin-opt PlutusTx.Plugin:defer-errors #-}
@@ -17,6 +18,7 @@ import PlutusTx.Test (goldenBudget, goldenEvalCekCatch, goldenPirReadable, golde
 import PlutusTx.TH (compile)
 
 import AsData.Budget.Types
+import PlutusTx.DataList
 
 tests :: TestNested
 tests =
@@ -38,7 +40,35 @@ tests =
     , goldenUPlcReadable "recordFields-manual" recordFieldsManual
     , goldenEvalCekCatch "recordFields-manual" $ [recordFieldsManual `unsafeApplyCode` inp]
     , goldenBudget "recordFields-budget-manual" (recordFieldsManual `unsafeApplyCode` inp)
+    , goldenPirReadable "constructListWithListSyntax" constructListWithListSyntax
+    , goldenUPlcReadable "constructListWithListSyntax" constructListWithListSyntax
+    , goldenEvalCekCatch "constructListWithListSyntax" $
+        [constructListWithListSyntax `unsafeApplyCode` liftCodeDef 1 `unsafeApplyCode` liftCodeDef 2]
+    , goldenBudget "constructListWithListSyntax"
+        (constructListWithListSyntax `unsafeApplyCode` liftCodeDef 1 `unsafeApplyCode` liftCodeDef 2)
+    , goldenPirReadable "constructList" constructList
+    , goldenUPlcReadable "constructList" constructList
+    , goldenEvalCekCatch "constructList" $
+        [constructList `unsafeApplyCode` liftCodeDef 1 `unsafeApplyCode` liftCodeDef 2]
+    , goldenBudget "constructList"
+        (constructList `unsafeApplyCode` liftCodeDef 1 `unsafeApplyCode` liftCodeDef 2)
     ]
+
+constructListWithListSyntax :: CompiledCode (Integer -> Integer -> List Integer)
+constructListWithListSyntax =
+  $$( compile
+        [||
+        \x y -> [x, y]
+        ||]
+    )
+
+constructList :: CompiledCode (Integer -> Integer -> List Integer)
+constructList =
+  $$( compile
+        [||
+        \x y -> Cons x (Cons y Nil)
+        ||]
+    )
 
 -- A function that only accesses the first field of `Ints`.
 -- TODO: the compiled code currently accesses all fields.

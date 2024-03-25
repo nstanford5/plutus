@@ -1,0 +1,30 @@
+program
+  1.1.0
+  ((\`$fIsListList_$cfromList` x y ->
+      force `$fIsListList_$cfromList`
+        (constr 0 [unIData, (\i -> iData i)])
+        (constr 1 [x, (constr 1 [y, (constr 0 [])])]))
+     ((\s -> s s)
+        (\s x ->
+           (\`$fIsListList_$cfromList` ->
+              delay
+                (\`$d(%,%)` eta ->
+                   force
+                     (case
+                        eta
+                        [ (delay (Constr 0 []))
+                        , (\ipv ipv ->
+                             delay
+                               ((\nt ->
+                                   constrData
+                                     1
+                                     (force mkCons
+                                        (case `$d(%,%)` [(\v v -> v)] ipv)
+                                        (force mkCons nt [])))
+                                  (force
+                                     (`$fIsListList_$cfromList`
+                                        (delay (\x -> x)))
+                                     `$d(%,%)`
+                                     ipv))) ])))
+             (s s))
+        (delay (\x -> x))))

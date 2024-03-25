@@ -1,0 +1,24 @@
+let
+  !`$bCons` :
+     all a.
+       (\a -> a -> data) a ->
+       (\a -> data -> a) a ->
+       a ->
+       (\a -> data) a ->
+       (\a -> data) a
+    = /\a ->
+        \(`$dToData` : (\a -> a -> data) a)
+         (`$dUnsafeFromData` : (\a -> data -> a) a)
+         (arg0_ : a)
+         (arg1_ : (\a -> data) a) ->
+          constrData
+            1
+            (mkCons {data} (`$dToData` arg0_) (mkCons {data} arg1_ []))
+in
+\(x : integer) (y : integer) ->
+  `$bCons`
+    {integer}
+    (\(i : integer) -> iData i)
+    unIData
+    x
+    (`$bCons` {integer} (\(i : integer) -> iData i) unIData y (Constr 0 []))

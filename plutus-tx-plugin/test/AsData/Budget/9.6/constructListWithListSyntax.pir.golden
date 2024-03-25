@@ -1,0 +1,63 @@
+let
+  data (`(%,%)` :: * -> * -> *) a b | `(%,%)_match` where
+    `(%,%)` : a -> b -> `(%,%)` a b
+in
+letrec
+  data (List :: * -> *) a | List_match where
+    Nil : List a
+    Cons : a -> List a -> List a
+in
+letrec
+  !`$fIsListList_$cfromList` :
+     all a.
+       `(%,%)` ((\a -> data -> a) a) ((\a -> a -> data) a) ->
+       List a ->
+       (\a -> data) a
+    = /\a ->
+        \(`$d(%,%)` : `(%,%)` ((\a -> data -> a) a) ((\a -> a -> data) a))
+         (eta : List a) ->
+          List_match
+            {a}
+            eta
+            {all dead. (\a -> data) a}
+            (/\dead -> Constr 0 [])
+            (\(ipv : a) (ipv : List a) ->
+               /\dead ->
+                 let
+                   !nt : data = `$fIsListList_$cfromList` {a} `$d(%,%)` ipv
+                 in
+                 constrData
+                   1
+                   (mkCons
+                      {data}
+                      ((let
+                           a = (\a -> data -> a) a
+                         in
+                         /\b ->
+                           \(v : `(%,%)` a b) ->
+                             `(%,%)_match`
+                               {a}
+                               {b}
+                               v
+                               {b}
+                               (\(v : a) (v : b) -> v))
+                         {(\a -> a -> data) a}
+                         `$d(%,%)`
+                         ipv)
+                      (mkCons {data} nt [])))
+            {all dead. dead}
+in
+\(x : integer) (y : integer) ->
+  `$fIsListList_$cfromList`
+    {integer}
+    (`(%,%)`
+       {(\a -> data -> a) integer}
+       {(\a -> a -> data) integer}
+       unIData
+       (\(i : integer) -> iData i))
+    ((let
+         a = List integer
+       in
+       \(c : integer -> a -> a) (n : a) -> c x (c y n))
+       (\(ds : integer) (ds : List integer) -> Cons {integer} ds ds)
+       (Nil {integer}))
